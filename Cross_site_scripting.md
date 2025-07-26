@@ -41,7 +41,7 @@
 ## 7. Reflected XSS into attribute with angle brackets HTML-encoded
 - **Location:** reflected cross-site scripting vulnerability in the search blog functionality where angle brackets are HTML-encoded.
 - **Payload:** `"autofocus onfocus="alert(1);this.onfocus=null` or `"onmouseover="alert(1)`
-- **How The Payload Works:** for this we basically need an evenhandler to trigger and call the fuction of malicious fucntion. here 1st one is gareenteed to trigger and `this.onfocus=null` ensures that in only executes once or it would be infinite loop of alert(). 2nd one only works if the user hover the search form with mouse.
+- **How The Payload Works:** for this we basically need an evenhandler to trigger and call the fuction of malicious function. here 1st one is gareenteed to trigger and `this.onfocus=null` ensures that in only executes once or it would be infinite loop of alert(). 2nd one only works if the user hover the search form with mouse.
 - **Root cause:** even though the angle bracket `<>` is encoded but the double quote `"` is not encoded and the dom injection happens direcly inside another html tag inside the `value` attribute. We can easily break out of that attribute and inject any attribute including eventhandlers.
 
 ## 8. Stored XSS into anchor href attribute with double quotes HTML-encoded
@@ -64,5 +64,18 @@ For the second paylaod the final variable value becomes `'' - alert(1) - ''` and
 - **How It Works:** this creates a search parameter with that has vaule a common xss Payload
 - **Root cause:** For some reason the website takes the valuse of a parameter that has key `storeId` and put it's value inside a `<option>` tag. which allows scope to inject the `<script>` tag.
 
+## 11. DOM XSS in AngularJS expression with angle brackets and double quotes HTML-encoded
+- **Location:** DOM-based cross-site scripting vulnerability in a AngularJS expression within the search functionality
+- **Payload:** `{{ $on.constructor('alert(1)')() }}`
+- **How It Works:** In angular js the browser executes some selected js code inside the `{{ }}`. One of them is the `on()` fucntion. A function's constructor property returns referece to the javascript function builder function. Then we can pass any statement or function call inside as a string which creates a function without any name. the final `()` make it so the newly constructed function get called in the same line. Angular js filter out all functions that can be abused but we can use any function that is in scope and get their constructor property and make another fucntion using it.
+- **Root cause:** This lab usese angularjs framework, it can be identified by the `ng-app` property in the body or other element. Even though angular js filters most of the js statements and functions but in older version it overlooked this method of using funtion's constructor property to make new function.  
+- **Note:** this video summarize this lab very well, https://www.youtube.com/watch?v=QpQp2JLn6JA. to find out what other function are in execute this in console `angular.element(document.getElementsByClassName('search')).scope()` and everything under prototype can be used.
+
+## 12. Reflected DOM XSS
+- **Location:** Reflected DOM vulnerabilities occur when the server-side application processes data from a request and echoes the data in the response
+- **Payload:** `\"-alert(1)} //`
+- **How It Works:** This string returned in the value of a json key called "information". we can broke out of the string with \" and then `-` to stay in the same key and then the alert function, then closing the json object with `}` and then comment out rest with `//`
+- **Root cause:** this works because the json key value becomes `{"information" : "" - alert()}` which is also a valid js object but not valid json(JSON does not allow expressions or function calls as values). The server always returns json and json is not a functional object but just a formatted string, we then need to turn it into proper asvascript object. One way is using `JSON.parse()` method, which is safe because it turns the string into JavaScript object which would not allow this payload because JSON cannot have expressions or function calls. another way is using `eval()` which turns the string into javascript object by *executing* the string as javascript which then execute the alert() function for the purpose of assigning its return data to the key and that means calling the function which executes the payload. The main reason is using unsafe method of turning string into object `eval()` instead of proper parsing using `JSON.parse()` method.
+- **Note:** JSON is not a functional object. Its just a string formated in a way to make it easy to parse this into js object.
 
 
