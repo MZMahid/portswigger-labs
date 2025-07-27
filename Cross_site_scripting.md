@@ -33,7 +33,7 @@
 
 ## 6. DOM XSS in jQuery selector sink using a hashchange event
 - **Location:** DOM-based cross-site scripting vulnerability on the home page
-- **Payload:** `<iframe src="https://lab_uuid_here.web-security-academy.net/#" onload= "this.src += '<img src=1 onerror=print()>'">`
+- **Payload(exploit server):** `<iframe src="https://lab_uuid_here.web-security-academy.net/#" onload= "this.src += '<img src=1 onerror=print()>'"></iframe>`
 - **How The Payload Works:** `<iframe>` loads the vulnerable lab website in another website where after loading the `onload` even handler triggers that changes the hash in the url and add the payload
 - **Root cause:** The reason why it works is its on an older vulnerable version of the jquery. this website uses jquery to jump to the title of blogs by putting its string into the hash of the url. But in this jquery version it creates a tag if it doesnt find the hash. which leads to executing the `img` tag payload.
 - **Note:** This will only work when the hash changes. So simply putting the payload as hash and loading it will not executing it. that is why we need to use iframe to first load the base url and then append the payload as hash to trigger the hashchange event.
@@ -80,7 +80,14 @@ For the second paylaod the final variable value becomes `'' - alert(1) - ''` and
 
 ## 13. Stored DOM XSS
 - **Location:** stored DOM vulnerability in the blog comment functionality
-- **Payload:** `<><h1 autofocus onfocus="alert(1);this.onfocus=null">`
+- **Payload:** `<><h1 autofocus onfocus="alert(1);this.onfocus=null">` or `<>`+{any tag containing appropiate event handler}
 - **How It Works:** the payload works because it first autofocus to the h1 element and then when focused trigged the onfocus even handler that executes the alert function the next line inside the event handler is so the event trigger once only, but its optional. This is also used in lab 7.
 - **Root cause:** the empty tag before does the trick `<>`. The client js uses `String.prototype.replace()` to encode the angle braces. when passed a string inside this string methode it only replace the first occurance of the pattern. So this string method only encode the first pair of curly brace and ignore the once later thus the 2nd element rendered properly.
 - **Note:** There is another vulnerability here. The encoding of the angle bracket should have happened in the server not in frontend.
+
+## 14. Reflected XSS into HTML context with most tags and attributes blocked
+- **Location:** Reflected XSS vulnerability in the search functionality but uses a web application firewall (WAF) to protect against common XSS vectors.
+- **Payload(exploit server):** `<iframe src="https://lab_uuid_here.web-security-academy.net/?search=<body+onresize%3D'print()'><%2Fbody>" onload= "this.style.width='100px'"></iframe>`
+- **How It Works:** In this lab most of the tags and attributes are blocked and will return 400 status code but using burp intruder we can find the tags and attribute that is not blocked. there is just `<body>` not blocked and a handful of attributes not blocked. We can use any of them to craft a payload, Here I used onresize and the using an iframe I can render the vulnerable page in another page and resize the iframe to trigger the `print()` function.
+- **Root cause:** Not all attributes and tags are blocked or encoded
+
