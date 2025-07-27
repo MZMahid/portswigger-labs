@@ -78,4 +78,9 @@ For the second paylaod the final variable value becomes `'' - alert(1) - ''` and
 - **Root cause:** this works because the json key value becomes `{"information" : "" - alert()}` which is also a valid js object but not valid json(JSON does not allow expressions or function calls as values). The server always returns json and json is not a functional object but just a formatted string, we then need to turn it into proper asvascript object. One way is using `JSON.parse()` method, which is safe because it turns the string into JavaScript object which would not allow this payload because JSON cannot have expressions or function calls. another way is using `eval()` which turns the string into javascript object by *executing* the string as javascript which then execute the alert() function for the purpose of assigning its return data to the key and that means calling the function which executes the payload. The main reason is using unsafe method of turning string into object `eval()` instead of proper parsing using `JSON.parse()` method.
 - **Note:** JSON is not a functional object. Its just a string formated in a way to make it easy to parse this into js object.
 
-
+## 13. Stored DOM XSS
+- **Location:** stored DOM vulnerability in the blog comment functionality
+- **Payload:** `<><h1 autofocus onfocus="alert(1);this.onfocus=null">`
+- **How It Works:** the payload works because it first autofocus to the h1 element and then when focused trigged the onfocus even handler that executes the alert function the next line inside the event handler is so the event trigger once only, but its optional. This is also used in lab 7.
+- **Root cause:** the empty tag before does the trick `<>`. The client js uses `String.prototype.replace()` to encode the angle braces. when passed a string inside this string methode it only replace the first occurance of the pattern. So this string method only encode the first pair of curly brace and ignore the once later thus the 2nd element rendered properly.
+- **Note:** There is another vulnerability here. The encoding of the angle bracket should have happened in the server not in frontend.
