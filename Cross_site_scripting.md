@@ -93,9 +93,18 @@ For the second paylaod the final variable value becomes `'' - alert(1) - ''` and
 
 ## 15. Reflected XSS into HTML context with all tags blocked except custom ones
 - **Location:** In the search functionality there is a reflected XSS but all the HTML tags are blocked
-- **Payload:** `<custom autofocus tabindex=1 onfocus="alert(document.cookie); this.onfocus=null">`
-- **How It Works:** In javascript we can make a custom tags and give attributes to them. Here we made the custom tag and game it attribute so that it behaves like a focusable element and then set it to autofocus. Onfocus even handler executes the alert() fucntion and the revomes it after executing once.
+- **Payload:** `<custom autofocus tabindex=1 onfocus="alert(document.cookie); this.onfocus=null">` But for some reason the lab wants us to make it "automated"(considering its already automated). so we have to use the exploit server and the content there will be `<script> location = "https://0a5300b003e96ff980d4039c00610085.web-security-academy.net/?search=%3Ccustom+autofocus+tabindex%3D1+onfocus%3D%22alert(document.cookie)%3B+this.onfocus%3Dnull%22%3E" </script>`
+another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and then in exploid server add `#x` at the end of the base url.
+- **How It Works:** In javascript we can make a custom tags and give attributes to them. Here we made the custom tag and game it attribute so that it behaves like a focusable element using `tabindex` and then set it to `autofocus` true. `onfocus` even handler executes the alert() fucntion and the `this.onfocus=null` removes the attribute to stop the loop of constant focus.
 - **Root cause:** The website does not sanitize angle brackets and double quotes. Instead it blocks all html tags, but does not block attributes and custom tags.
-- **Note:** The lab solution is to make the payload automated. We can assign the malicious url to `location` variable in another webpage inside a script tag.
+- **Note:** We cannot use iframe in the exploit server. The reason is in the http respose there is the `X-Frame-Options: SAMEORIGIN`. This tells the server to not laod the iframe if the parent page is not from same origin as the iframe source. That is why we used script tag.
+
+
+## 16. Reflected XSS with some SVG markup allowed
+- **Location:** 
+- **Payload:** 
+- **How It Works:** 
+- **Root cause:** 
+- **Note:** 
 
 
