@@ -91,3 +91,11 @@ For the second paylaod the final variable value becomes `'' - alert(1) - ''` and
 - **How It Works:** In this lab most of the tags and attributes are blocked and will return 400 status code but using burp intruder we can find the tags and attribute that is not blocked. there is just `<body>` not blocked and a handful of attributes not blocked. We can use any of them to craft a payload, Here I used onresize and the using an iframe I can render the vulnerable page in another page and resize the iframe to trigger the `print()` function.
 - **Root cause:** Not all attributes and tags are blocked or encoded
 
+## 15. Reflected XSS into HTML context with all tags blocked except custom ones
+- **Location:** In the search functionality there is a reflected XSS but all the HTML tags are blocked
+- **Payload:** `<custom autofocus tabindex=1 onfocus="alert(document.cookie); this.onfocus=null">`
+- **How It Works:** In javascript we can make a custom tags and give attributes to them. Here we made the custom tag and game it attribute so that it behaves like a focusable element and then set it to autofocus. Onfocus even handler executes the alert() fucntion and the revomes it after executing once.
+- **Root cause:** The website does not sanitize angle brackets and double quotes. Instead it blocks all html tags, but does not block attributes and custom tags.
+- **Note:** The lab solution is to make the payload automated. We can assign the malicious url to `location` variable in another webpage inside a script tag.
+
+
