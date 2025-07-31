@@ -107,11 +107,21 @@ another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and the
 - **Root cause:** Not all tags and attributes are blocked by WAF(Web Application Firewall). Then again the best approach would be to jsut sanitize inputs like `"` and '<>'
 - **Note:** To find which tags and attributes are not blocked by WAF we can use burp intruder.
 
-## 17. Reflected XSS in canonical link tag
+<!-- This lab needs revision, I still cannot fully understand it -->
+## 17. Reflected XSS in canonical link tag 
 - **Location:** Reflected Cross Site Scripting Vulnerability in the home page inside a `link` tag
 - **Payload:** the payload is appending this query string with the base url `?'accesskey='X'onclick='alert(1)'`
 - **How It Works:** The server side code puts the the query string inside a href in link tag. we can sue `'` to break out put the nessasary attributes. The `accesskey` enables simulating clicking on the element with keyboard, for linux the hotkey for this is `Alt + Shit + <the access keys>` in out case Alt + Shift + X. which trigger the onclick() event and executes the alert funciton
 - **Root cause:** The server sanitize the double quote but not the isngle quote.
 - **Note:** This exploit may not be possible if not for some weird input manipulation does by the server. where when I input the single quote in the query string inside that vulnerable href it shows `" ' "="`. Because of this the href automatically closes for that leading `"`. I don't know why the server does this. But since the `"` is encoded there was no way we could have broken out of the href attribute without that given `"`.
+
+## 18. Reflected XSS into a JavaScript string with single quote and backslash escaped
+- **Location:** Reflected XSS in the serch functionality inside a script tag block
+- **Payload:** `</script><script>alert(1)</script>`
+- **How It Works:** this paylaod gets injected inside a javascript string which is inside a script tag. The browser first performs the html parsing to identify the page elements including blocks of script, it then parse the javascript. That is why even being inside single `''` quote the paylaod act as html element and not a string. 
+- **Root cause:** Does not sanitize the angle brackets.
+
+
+
 
 
