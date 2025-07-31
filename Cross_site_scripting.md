@@ -101,10 +101,10 @@ another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and the
 
 
 ## 16. Reflected XSS with some SVG markup allowed
-- **Location:** 
-- **Payload:** 
-- **How It Works:** 
-- **Root cause:** 
-- **Note:** 
+- **Location:** Reflected Cross Site Scripting vulnerability in the Seach functionality but the WAF is blocking most of the tags and attributes
+- **Payload:** `<svg><animatetransform onbegin=alert(1)>`
+- **How It Works:** Inside `svg` we have another tag that works only inside svg is `animatetransform` and this animates an svg images. the `onbegin` attribute executes whenever the animatetransform tag is rendered, basically it trigger automatically at the start, so we can pass our proff of concept function alert() inside that.
+- **Root cause:** Not all tags and attributes are blocked by WAF. Then again the best approach would be to jsut sanitize inputs like `"` and '<>'
+
 
 
