@@ -111,7 +111,7 @@ another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and the
 ## 17. Reflected XSS in canonical link tag 
 - **Location:** Reflected Cross Site Scripting Vulnerability in the home page inside a `link` tag
 - **Payload:** the payload is appending this query string with the base url `?'accesskey='X'onclick='alert(1)'`
-- **How It Works:** The server side code puts the the query string inside a href in link tag. we can sue `'` to break out put the nessasary attributes. The `accesskey` enables simulating clicking on the element with keyboard, for linux the hotkey for this is `Alt + Shit + <the access keys>` in out case Alt + Shift + X. which trigger the onclick() event and executes the alert funciton
+- **How It Works:** The server side code puts the the query string inside a href in link tag. we can use `'` to break out put the nessasary attributes. The `accesskey` enables simulating clicking on the element with keyboard, for linux the hotkey for this is `Alt + Shit + <the access keys>` in out case Alt + Shift + X. which trigger the onclick() event and executes the alert funciton
 - **Root cause:** The server sanitize the double quote but not the isngle quote.
 - **Note:** This exploit may not be possible if not for some weird input manipulation does by the server. where when I input the single quote in the query string inside that vulnerable href it shows `" ' "="`. Because of this the href automatically closes for that leading `"`. I don't know why the server does this. But since the `"` is encoded there was no way we could have broken out of the href attribute without that given `"`.
 
@@ -121,6 +121,11 @@ another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and the
 - **How It Works:** this paylaod gets injected inside a javascript string which is inside a script tag. The browser first performs the html parsing to identify the page elements including blocks of script, it then parse the javascript. That is why even being inside single `''` quote the paylaod act as html element and not a string. 
 - **Root cause:** Does not sanitize the angle brackets.
 
+## 19. Reflected XSS into a JavaScript string with angle brackets and double quotes HTML-encoded and single quotes escaped
+- **Location:** Reflected XSS in the Search functionality inside a script tag inside a javascript string.
+- **Payload:** `\';alert(1)//`
+- **How It Works:** since the server escapes the single quote we can use another backslash to escape the escaping backslash. then the closing quote and the usuals. At the end `//` commets out the other codes including the other single quote of the original string so that the script does not give any error.
+- **Root cause:** the escaping feature can easily bypassed because the server is not not escaping the backslash itself.
 
 
 
