@@ -104,7 +104,14 @@ another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and the
 - **Location:** Reflected Cross Site Scripting vulnerability in the Seach functionality but the WAF is blocking most of the tags and attributes
 - **Payload:** `<svg><animatetransform onbegin=alert(1)>`
 - **How It Works:** Inside `svg` we have another tag that works only inside svg is `animatetransform` and this animates an svg images. the `onbegin` attribute executes whenever the animatetransform tag is rendered, basically it trigger automatically at the start, so we can pass our proff of concept function alert() inside that.
-- **Root cause:** Not all tags and attributes are blocked by WAF. Then again the best approach would be to jsut sanitize inputs like `"` and '<>'
+- **Root cause:** Not all tags and attributes are blocked by WAF(Web Application Firewall). Then again the best approach would be to jsut sanitize inputs like `"` and '<>'
+- **Note:** To find which tags and attributes are not blocked by WAF we can use burp intruder.
 
+## 17. Reflected XSS in canonical link tag
+- **Location:** Reflected Cross Site Scripting Vulnerability in the home page inside a `link` tag
+- **Payload:** the payload is appending this query string with the base url `?'accesskey='X'onclick='alert(1)'`
+- **How It Works:** The server side code puts the the query string inside a href in link tag. we can sue `'` to break out put the nessasary attributes. The `accesskey` enables simulating clicking on the element with keyboard, for linux the hotkey for this is `Alt + Shit + <the access keys>` in out case Alt + Shift + X. which trigger the onclick() event and executes the alert funciton
+- **Root cause:** The server sanitize the double quote but not the isngle quote.
+- **Note:** This exploit may not be possible if not for some weird input manipulation does by the server. where when I input the single quote in the query string inside that vulnerable href it shows `" ' "="`. Because of this the href automatically closes for that leading `"`. I don't know why the server does this. But since the `"` is encoded there was no way we could have broken out of the href attribute without that given `"`.
 
 
