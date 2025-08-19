@@ -93,7 +93,7 @@ For the second paylaod the final variable value becomes `'' - alert(1) - ''` and
 
 ## 15. Reflected XSS into HTML context with all tags blocked except custom ones
 - **Location:** In the search functionality there is a reflected XSS but all the HTML tags are blocked
-- **Payload:** `<custom autofocus tabindex=1 onfocus="alert(document.cookie); this.onfocus=null">` But for some reason the lab wants us to make it "automated"(considering its already automated). so we have to use the exploit server and the content there will be `<script> location = "https://0a5300b003e96ff980d4039c00610085.web-security-academy.net/?search=%3Ccustom+autofocus+tabindex%3D1+onfocus%3D%22alert(document.cookie)%3B+this.onfocus%3Dnull%22%3E" </script>`
+- **Payload:** `<custom autofocus tabindex=1 onfocus="alert(document.cookie); this.onfocus=null">` But for some reason the lab wants us to make it "automated"(considering its already automated). so we have to use the exploit server and the content there will be `<script> location = "https://lab_uuid_here.web-security-academy.net/?search=%3Ccustom+autofocus+tabindex%3D1+onfocus%3D%22alert(document.cookie)%3B+this.onfocus%3Dnull%22%3E" </script>`
 another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and then in exploid server add `#x` at the end of the base url.
 - **How It Works:** In javascript we can make a custom tags and give attributes to them. Here we made the custom tag and game it attribute so that it behaves like a focusable element using `tabindex` and then set it to `autofocus` true. `onfocus` even handler executes the alert() fucntion and the `this.onfocus=null` removes the attribute to stop the loop of constant focus.
 - **Root cause:** The website does not sanitize angle brackets and double quotes. Instead it blocks all html tags, but does not block attributes and custom tags.
@@ -104,15 +104,15 @@ another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and the
 - **Location:** Reflected Cross Site Scripting vulnerability in the Seach functionality but the WAF is blocking most of the tags and attributes
 - **Payload:** `<svg><animatetransform onbegin=alert(1)>`
 - **How It Works:** Inside `svg` we have another tag that works only inside svg is `animatetransform` and this animates an svg images. the `onbegin` attribute executes whenever the animatetransform tag is rendered, basically it trigger automatically at the start, so we can pass our proff of concept function alert() inside that.
-- **Root cause:** Not all tags and attributes are blocked by WAF(Web Application Firewall). Then again the best approach would be to jsut sanitize inputs like `"` and '<>'
+- **Root cause:** Not all tags and attributes are blocked by WAF(Web Application Firewall). Then again the best approach would be to just sanitize inputs like `"` and '<>'
 - **Note:** To find which tags and attributes are not blocked by WAF we can use burp intruder.
 
 <!-- This lab needs revision, I still cannot fully understand it -->
 ## 17. Reflected XSS in canonical link tag 
 - **Location:** Reflected Cross Site Scripting Vulnerability in the home page inside a `link` tag
 - **Payload:** the payload is appending this query string with the base url `?'accesskey='X'onclick='alert(1)'`
-- **How It Works:** The server side code puts the the query string inside a href in link tag. we can use `'` to break out put the nessasary attributes. The `accesskey` enables simulating clicking on the element with keyboard, for linux the hotkey for this is `Alt + Shit + <the access keys>` in out case Alt + Shift + X. which trigger the onclick() event and executes the alert funciton
-- **Root cause:** The server sanitize the double quote but not the isngle quote.
+- **How It Works:** The server side code puts the the query string inside a href in link tag. we can use `'` to break out put the nessasary attributes. The `accesskey` enables simulating clicking on the element with keyboard, for linux the hotkey for this is `Alt + Shit + <the access keys>` in our case Alt + Shift + X. which trigger the onclick() event and executes the alert funciton
+- **Root cause:** The server sanitize the double quote but not the single quote.
 - **Note:** This exploit may not be possible if not for some weird input manipulation does by the server. where when I input the single quote in the query string inside that vulnerable href it shows `" ' "="`. Because of this the href automatically closes for that leading `"`. I don't know why the server does this. But since the `"` is encoded there was no way we could have broken out of the href attribute without that given `"`.
 
 ## 18. Reflected XSS into a JavaScript string with single quote and backslash escaped
@@ -125,7 +125,21 @@ another payload could be `<custom id = 'x' tabindex=1 onfoucs=alert(1)>` and the
 - **Location:** Reflected XSS in the Search functionality inside a script tag inside a javascript string.
 - **Payload:** `\';alert(1)//`
 - **How It Works:** since the server escapes the single quote we can use another backslash to escape the escaping backslash. then the closing quote and the usuals. At the end `//` commets out the other codes including the other single quote of the original string so that the script does not give any error.
-- **Root cause:** the escaping feature can easily bypassed because the server is not not escaping the backslash itself.
+- **Root cause:** the escaping feature can easily bypassed because the server is not escaping the backslash itself.
+
+## 20. Stored XSS into onclick event with angle brackets and double quotes HTML-encoded and single quotes and backslash escaped 
+- **Location:** This lab contains a stored cross-site scripting vulnerability in the comment functionality
+- **Payload:** `http://evil.com/&apos;-alert()-&apos;`
+- **How It Works:** The payload gets stored and when rendered in the onclick handler, the &apos; entities get decoded to single quotes. This transforms:`onclick="tracker.track('http://evil.com/&apos;-alert()-&apos;')"`
+- **Root cause:** Input sanitization bypass via HTML entities
+- **Notes:** This behaviour of decoding html encoded character entities is only happens inside attributes of html tag and content of html elements. This *does not* work inside the `<script>` tag and in json responses parsed with `JSON.parse()`. Unless ofcourse there is server side programming written to do otherwise.
+
+## 
+- **Location:** 
+- **Payload:** 
+- **How It Works:** 
+- **Root cause:** 
+- **Note:** 
 
 
 
